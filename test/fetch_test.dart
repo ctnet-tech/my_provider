@@ -19,24 +19,24 @@ const loadingText = 'NULL';
 
 MockClient? client;
 
-requestString() async {
+requestString(dynamic params) async {
   final response =
       await client!.get(Uri.parse("https://domain.com/get-string"));
   return response.body;
 }
 
-requestJson() async {
+requestJson(dynamic params) async {
   final response = await client!.get(Uri.parse("https://domain.com/get-json"));
   var product = ProductFactory.create(response.body);
   return product;
 }
 
-requestError() async {
+requestError(dynamic params) async {
   final response = await client!.get(Uri.parse("https://domain.com/get-error"));
-  return FetchError(httpStatus: response.statusCode, message: response.body);
+  throw FetchError(httpStatus: response.statusCode, message: response.body);
 }
 
-requestException() async {
+requestException(dynamic params) async {
   final response =
       await client!.get(Uri.parse("https://domain.com/get-exception"));
   return response.body;
@@ -53,7 +53,7 @@ main() {
       return http.Response(fetchResponseText, 200);
     });
 
-    var fetch = Fetch<String?>(
+    var fetch = Fetch<String?, dynamic>(
         request: requestString,
         builder: (fetchState) {
           if (fetchState.response == null) {
@@ -80,7 +80,7 @@ main() {
       return http.Response('{"id": 1, "name": "cat", "type": "pet"}', 200);
     });
 
-    var fetch = Fetch<Product?>(
+    var fetch = Fetch<Product?, dynamic>(
         request: requestJson,
         builder: (fetchState) {
           if (fetchState.response == null) {
@@ -109,7 +109,7 @@ main() {
       return http.Response(fetchErrorMessage, 404);
     });
 
-    var fetch = Fetch<Product?>(
+    var fetch = Fetch<Product?, dynamic>(
         request: requestError,
         builder: (response) {
           if (response.loading == true) {
@@ -137,7 +137,7 @@ main() {
       throw Exception(fetchExceptionMessage);
     });
 
-    var fetch = Fetch<Product?>(
+    var fetch = Fetch<Product?, dynamic>(
         request: requestException,
         builder: (response) {
           if (response.exception != null) {
@@ -170,7 +170,7 @@ main() {
       return http.Response(fetchResponseText, 200);
     });
 
-    var fetch = Fetch<String?>(
+    var fetch = Fetch<String?, dynamic>(
         request: requestString,
         builder: (fetchState) {
           if (fetchState.loading == true) {

@@ -27,6 +27,8 @@ class ProductFactory {
 }
 
 class Product {
+  Product({this.name, this.type});
+
   int? id;
   String? name;
   String? type;
