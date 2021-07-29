@@ -30,6 +30,10 @@ class FetchState<TResponse, TParams> {
 }
 
 class Fetch<TResponse, TParams> extends StatefulWidget {
+  static setResponse(String providerKey, dynamic response) {
+    throw UnimplementedError();
+  }
+
   Fetch(
       {Key? key,
       required this.request,
@@ -37,9 +41,11 @@ class Fetch<TResponse, TParams> extends StatefulWidget {
       this.params,
       this.lazy = false,
       this.onSuccess,
-      this.onError})
+      this.onError,
+      this.providerKey})
       : super(key: key);
 
+  final String? providerKey;
   final bool lazy;
   final Function(TParams? params) request;
   final Function(FetchState<TResponse, TParams> fetchState) builder;
@@ -56,6 +62,8 @@ class Fetch<TResponse, TParams> extends StatefulWidget {
 class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
   late FetchState<TResponse, TParams> _fetchState;
 
+  bool _disposed = false;
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +75,13 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
     }
   }
 
+  @override
+  void dispose() {
+    this._disposed = true;
+
+    super.dispose();
+  }
+
   _request(TParams? params) async {
     try {
       setState(() {
@@ -75,6 +90,10 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
       });
 
       var response = await widget.request(params ?? widget.params);
+
+      if (this._disposed) {
+        return;
+      }
 
       this.setState(() {
         _fetchState = FetchState(
@@ -85,6 +104,10 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
         widget.onSuccess!(response);
       }
     } on FetchError catch (error) {
+      if (this._disposed) {
+        return;
+      }
+
       this.setState(() {
         _fetchState = FetchState(
             fetch: _request,
@@ -97,6 +120,10 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
         widget.onError!(error);
       }
     } on Exception catch (exception) {
+      if (this._disposed) {
+        return;
+      }
+
       this.setState(() {
         _fetchState = FetchState(
             fetch: _request,

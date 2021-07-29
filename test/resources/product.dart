@@ -13,6 +13,8 @@ class ProductFactory {
     if (json["id"] is int) product.id = json["id"];
     if (json["name"] is String) product.name = json["name"];
     if (json["type"] is String) product.type = json["type"];
+    if (json["isDeleted"] is String)
+      product.isDeleted = json["isDeleted"] == 'true';
 
     return product;
   }
@@ -22,6 +24,8 @@ class ProductFactory {
     data["id"] = product.id;
     data["name"] = product.name;
     data["type"] = product.type;
+    data["isDeleted"] = product.isDeleted;
+
     return data;
   }
 }
@@ -32,4 +36,6 @@ class Product {
   int? id;
   String? name;
   String? type;
+
+  bool? isDeleted;
 }

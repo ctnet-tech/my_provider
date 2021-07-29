@@ -10,6 +10,18 @@ setClient(dynamic client) {
   _client = client;
 }
 
+Future<Product> getProduct(ProductFetchParams? params) async {
+  final response = await _client!
+      .get(Uri.parse("https://domain.com/products/${params!.productId!}"));
+
+  if (response.statusCode != 200) {
+    throw FetchError(httpStatus: response.statusCode, message: response.body);
+  }
+
+  var product = ProductFactory.create(response.body);
+  return product;
+}
+
 Future<Product> postProduct(ProductFetchParams? params) async {
   final response = await _client!
       .post(Uri.parse("https://domain.com/products"), body: params!.body);

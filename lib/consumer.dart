@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:my_provider/provider.dart';
 
 class Consumer<TValue> extends StatefulWidget {
-  Consumer({required this.providerKey, required this.builder}) {}
+  Consumer({required this.providerKey, required this.builder});
 
   final String providerKey;
   final Function(BuildContext context, TValue child) builder;
