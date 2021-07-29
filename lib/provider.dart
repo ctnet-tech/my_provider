@@ -5,6 +5,7 @@ class ProviderCallback<TValue> {
 
   final String providerKey;
   final ProviderCallbackFunc<TValue> callbackFunc;
+
 }
 
 class Provider<TValue> {
