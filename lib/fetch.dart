@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'provider.dart';
+
 class FetchException {
   FetchException({required this.exception, required this.message});
 
@@ -17,10 +19,10 @@ class FetchError {
 class FetchState<TResponse, TParams> {
   FetchState(
       {this.loading,
-      this.response,
-      this.error,
-      this.exception,
-      required this.fetch});
+        this.response,
+        this.error,
+        this.exception,
+        required this.fetch});
 
   Function(TParams? params) fetch;
   bool? loading;
@@ -30,19 +32,21 @@ class FetchState<TResponse, TParams> {
 }
 
 class Fetch<TResponse, TParams> extends StatefulWidget {
+
   static setResponse(String providerKey, dynamic response) {
-    throw UnimplementedError();
+    // set provider
+    Provider(providerKey: providerKey, value: response).setValue(response);
   }
 
   Fetch(
       {Key? key,
-      required this.request,
-      required this.builder,
-      this.params,
-      this.lazy = false,
-      this.onSuccess,
-      this.onError,
-      this.providerKey})
+        required this.request,
+        required this.builder,
+        this.params,
+        this.lazy = false,
+        this.onSuccess,
+        this.onError,
+        this.providerKey})
       : super(key: key);
 
   final String? providerKey;
@@ -66,13 +70,24 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
 
   @override
   void initState() {
-    super.initState();
 
+    if(widget.providerKey!=null && widget.providerKey!.isNotEmpty == true){
+      // tao call back provider
+      Provider.registerCallback(ProviderCallback(widget.providerKey!,onChange));
+    }
+
+    super.initState();
     _fetchState = FetchState(fetch: _request);
 
     if (!widget.lazy) {
       _request(null);
     }
+  }
+  onChange(value) {
+    setState(() {
+      // set lai fetch
+      _fetchState = FetchState(fetch: _request, loading: false, response: value, error: null);
+    });
   }
 
   @override
