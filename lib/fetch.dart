@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:my_provider/provider.dart';
 
 class FetchException {
   FetchException({required this.exception, required this.message});
@@ -31,7 +32,7 @@ class FetchState<TResponse, TParams> {
 
 class Fetch<TResponse, TParams> extends StatefulWidget {
   static setResponse(String providerKey, dynamic response) {
-    throw UnimplementedError();
+    Provider(providerKey: providerKey, value: response).setValue(response);
   }
 
   Fetch(
@@ -70,9 +71,21 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
 
     _fetchState = FetchState(fetch: _request);
 
+    if (widget.providerKey != null && widget.providerKey!.isNotEmpty) {
+      Provider.registerCallback(
+          ProviderCallback(widget.providerKey!, this._callback));
+    }
+
     if (!widget.lazy) {
       _request(null);
     }
+  }
+
+  _callback(value) {
+    setState(() {
+      _fetchState = FetchState(
+          fetch: _request, loading: false, response: value, error: null);
+    });
   }
 
   @override
