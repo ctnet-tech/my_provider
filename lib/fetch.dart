@@ -32,10 +32,16 @@ class FetchState<TResponse, TParams> {
 }
 
 class Fetch<TResponse, TParams> extends StatefulWidget {
-
+  static Map<String,Provider> providers = {};
+  static  setProvider({required String providerKey, dynamic val}){
+    providers[providerKey] = Provider(providerKey: providerKey, value: val) ;
+  }
   static setResponse(String providerKey, dynamic response) {
+    if (providers[providerKey] == null){
+      setProvider(providerKey: providerKey,val: response);
+    }
     // set provider
-    Provider(providerKey: providerKey, value: response).setValue(response);
+    providers[providerKey]!.setValue(response);
   }
 
   Fetch(
