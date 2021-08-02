@@ -47,9 +47,10 @@ main() {
             lazy: true,
             params: params,
             request: deleteProduct,
-            onSuccess: (deletedProduct) {
+            onSuccess: (deletedProduct) async {
               getProductState.response?.isDeleted = true;
-              Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
+              await Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
+              await Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
             },
             builder: deleteProducrtBuidler);
       },
