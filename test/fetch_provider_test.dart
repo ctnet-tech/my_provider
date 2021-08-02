@@ -47,7 +47,7 @@ main() {
             lazy: true,
             params: params,
             request: deleteProduct,
-            onSuccess: (deletedProduct) {
+            onSuccess: (deletedProduct, _) {
               getProductState.response?.isDeleted = true;
               Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
             },
