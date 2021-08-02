@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
-
 import 'provider.dart';
 
 class FetchException {
@@ -32,6 +32,9 @@ class FetchState<TResponse, TParams> {
 }
 
 class Fetch<TResponse, TParams> extends StatefulWidget {
+  static Map<String, dynamic> mapFetch = Map();
+  static bool isCaching = false;
+
   static setResponse(String providerKey, dynamic response) {
     Provider(providerKey: providerKey, value: response).setValue(response);
   }
@@ -74,24 +77,40 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
   late FetchState<TResponse, TParams> _fetchState;
 
   bool _disposed = false;
+  int countCacheDuration = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    if(widget.providerKey!=null)
-    Provider.registerCallback(
-        ProviderCallback(widget.providerKey!, this._onUpdateCallback));
-    _fetchState = FetchState(fetch: _request);
 
+    if (widget.providerKey != null) {
+      Provider.registerCallback(
+          ProviderCallback(widget.providerKey!, this._onUpdateCallback));
+    }
+    if (Fetch.mapFetch.keys
+        .where((element) => element == widget.providerKey)
+        .isEmpty)
+      _fetchState = FetchState(fetch: _request);
+    else {
+      if (widget.onInit != null) {
+        widget.onInit!(Fetch.mapFetch[widget.providerKey!]);
+      }
+      _fetchState = Fetch.mapFetch[widget.providerKey!];
+    }
     if (!widget.lazy) {
-      _request(null);
+      if (Fetch.mapFetch.keys
+              .where((element) => element == widget.providerKey)
+              .isEmpty ||
+          (widget.cacheDuration == null && widget.cacheFirst == null))
+        _request(null);
     }
   }
 
   @override
   void dispose() {
     this._disposed = true;
-
+    if (_timer != null) _timer!.cancel();
     super.dispose();
   }
 
@@ -103,58 +122,76 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
   }
 
   _request(TParams? params) async {
-    try {
-      setState(() {
-        _fetchState = FetchState(
-            fetch: _request, response: _fetchState.response, loading: true);
-      });
+    if (Fetch.isCaching != true)
+      try {
+        if (!(widget.cacheDuration == null && widget.cacheFirst == null)) {
+          Fetch.isCaching = true;
+          _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+            if (countCacheDuration == widget.cacheDuration) {
+              Fetch.isCaching = false;
+              timer.cancel();
+            }
+            countCacheDuration += 1000;
+          });
+        }
+        setState(() {
+          _fetchState = FetchState(
+              fetch: _request, response: _fetchState.response, loading: true);
+        });
 
-      var response = params != null
-          ? await widget.request(params)
-          : await widget.request(widget.params);
+        var response = params != null
+            ? await widget.request(params)
+            : await widget.request(widget.params);
 
-      if (this._disposed) {
-        return;
+        if (this._disposed) {
+          return;
+        }
+
+        this.setState(() {
+          _fetchState = FetchState(
+              fetch: _request, loading: false, response: response, error: null);
+        });
+
+        if (Fetch.mapFetch.keys
+                .where((element) => element == widget.providerKey)
+                .isEmpty &&
+            widget.providerKey != null)
+          Fetch.mapFetch[widget.providerKey!] = _fetchState;
+
+        if (widget.onSuccess != null) {
+          widget.onSuccess!(response, Fetch.mapFetch[widget.providerKey!]);
+        }
+        Fetch.isCaching = false;
+      } on FetchError catch (error) {
+        if (this._disposed) {
+          return;
+        }
+
+        this.setState(() {
+          _fetchState = FetchState(
+              fetch: _request,
+              loading: false,
+              response: _fetchState.response,
+              error: error);
+        });
+
+        if (widget.onError != null) {
+          widget.onError!(error);
+        }
+      } on Exception catch (exception) {
+        if (this._disposed) {
+          return;
+        }
+
+        this.setState(() {
+          _fetchState = FetchState(
+              fetch: _request,
+              loading: false,
+              response: _fetchState.response,
+              exception: FetchException(
+                  exception: exception, message: exception.toString()));
+        });
       }
-
-      this.setState(() {
-        _fetchState = FetchState(
-            fetch: _request, loading: false, response: response, error: null);
-      });
-
-      if (widget.onSuccess != null) {
-        widget.onSuccess!(response, this._fetchState);
-      }
-    } on FetchError catch (error) {
-      if (this._disposed) {
-        return;
-      }
-
-      this.setState(() {
-        _fetchState = FetchState(
-            fetch: _request,
-            loading: false,
-            response: _fetchState.response,
-            error: error);
-      });
-
-      if (widget.onError != null) {
-        widget.onError!(error);
-      }
-    } on Exception catch (exception) {
-      if (this._disposed) {
-        return;
-      }
-
-      this.setState(() {
-        _fetchState = FetchState(
-            fetch: _request,
-            loading: false,
-            response: _fetchState.response,
-            exception: FetchException(
-                exception: exception, message: exception.toString()));
-      });
-    }
   }
 
   @override

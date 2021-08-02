@@ -49,8 +49,8 @@ main() {
       ],
     );
 
-    await tester.pumpWidget(fetch, Duration(seconds: 1));
-
+    await tester.pumpWidget(fetch);
+    await tester.pump(Duration(seconds: 1));
     expect(fetchState_1, isNot(null));
     expect(fetchState_2, isNot(null));
 
@@ -100,8 +100,8 @@ main() {
               return Fetch<Product?, ProductFetchParams>(
                   providerKey: "FETCH_PRODUCT",
                   cacheFirst: true,
-                  onInit: (fetchState) {
-                    fetchState_2 = fetchState;
+                  onInit: (fetchStateInit) {
+                    fetchState_2 = fetchStateInit;
                   },
                   onSuccess: (response, fetchState) {
                     successCount++;
@@ -117,11 +117,12 @@ main() {
       ],
     );
 
-    await tester.pumpWidget(fetch, Duration(seconds: 2));
-
+    await tester.pumpWidget(fetch);
+    await tester.pump(Duration(seconds: 2));
     expect(requestCount, 1);
     expect(successCount, 1);
 
     expect(fetchState_1, fetchState_2);
+    await tester.pump(Duration(seconds: 10));
   });
 }
