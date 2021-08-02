@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -24,7 +25,7 @@ main() {
     });
 
     when(client.delete(
-            Uri.parse("https://domain.com/products/${params.body!.id}")))
+        Uri.parse("https://domain.com/products/${params.body!.id}")))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 200);
@@ -47,10 +48,9 @@ main() {
             lazy: true,
             params: params,
             request: deleteProduct,
-            onSuccess: (deletedProduct) async {
+            onSuccess: (deletedProduct, _) {
               getProductState.response?.isDeleted = true;
-              await Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
-              await Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
+              Fetch.setResponse("GET_PRODUCT_DATA", getProductState.response);
             },
             builder: deleteProducrtBuidler);
       },

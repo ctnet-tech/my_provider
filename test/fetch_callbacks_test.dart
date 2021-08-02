@@ -28,7 +28,7 @@ main() {
 
     var fetch = Fetch<Product?, ProductFetchParams>(
         lazy: true,
-        onSuccess: (response) {
+        onSuccess: (response, _) {
           isSuccess = true;
         },
         params: params,
