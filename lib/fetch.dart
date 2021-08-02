@@ -43,7 +43,10 @@ class Fetch<TResponse, TParams> extends StatefulWidget {
       this.lazy = false,
       this.onSuccess,
       this.onError,
-      this.providerKey})
+      this.providerKey,
+      this.cacheFirst,
+      this.cacheDuration,
+      this.onInit})
       : super(key: key);
 
   final String? providerKey;
@@ -53,8 +56,14 @@ class Fetch<TResponse, TParams> extends StatefulWidget {
 
   final TParams? params;
 
-  final Function(TResponse? response)? onSuccess;
+  final Function(FetchState<TResponse, TParams>)? onInit;
+
+  final Function(TResponse? response, FetchState<TResponse, TParams>)?
+      onSuccess;
   final Function(FetchError? response)? onError;
+
+  final bool? cacheFirst;
+  final int? cacheDuration;
 
   @override
   _FetchState createState() => _FetchState<TResponse, TParams>();
@@ -102,7 +111,9 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
             fetch: _request, response: _fetchState.response, loading: true);
       });
 
-      var response = await widget.request(params ?? widget.params);
+      var response = params != null
+          ? await widget.request(params)
+          : await widget.request(widget.params);
 
       if (this._disposed) {
         return;
@@ -114,7 +125,7 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
       });
 
       if (widget.onSuccess != null) {
-        widget.onSuccess!(response);
+        widget.onSuccess!(response, this._fetchState);
       }
     } on FetchError catch (error) {
       if (this._disposed) {

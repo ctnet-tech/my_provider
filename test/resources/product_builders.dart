@@ -4,6 +4,18 @@ import 'product_data.dart';
 
 const loadingText = 'LOADING';
 
+getProductBuidler(fetchState) {
+  if (fetchState.loading == true) {
+    return Text(loadingText, textDirection: TextDirection.ltr);
+  }
+
+  if (fetchState.response != null) {
+    return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
+  }
+
+  return Text(fetchState.response.name, textDirection: TextDirection.rtl);
+}
+
 deleteProducrtBuidler(fetchState) {
   if (fetchState.loading == true) {
     return Text(loadingText, textDirection: TextDirection.ltr);
