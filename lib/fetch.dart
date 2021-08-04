@@ -162,10 +162,6 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
     }
     setState(() {
       _fetchState = Fetch.mapFetch[widget.providerKey!];
-//      _fetchState.response = fetchState.response;
-//      _fetchState.error = fetchState.error;
-//      _fetchState.loading = fetchState.loading;
-//      _fetchState.exception = fetchState.exception;
     });
     if (hasOnSuccess == true) {
       if (widget.onSuccess != null) {
@@ -231,8 +227,6 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
         if (widget.providerKey == null) if (widget.onSuccess != null) {
           widget.onSuccess!(response, _fetchState);
         }
-//        if (widget.providerKey != null)
-//          Fetch.mapIsCaching[widget.providerKey!] = false;
         if (_timer != null && _timer!.isActive) {
           _timer!.cancel();
         }
