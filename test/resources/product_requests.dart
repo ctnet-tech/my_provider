@@ -17,7 +17,6 @@ Future<Product> getProduct(ProductFetchParams? params) async {
   if (response.statusCode != 200) {
     throw FetchError(httpStatus: response.statusCode, message: response.body);
   }
-
   var product = ProductFactory.create(response.body);
   return product;
 }
