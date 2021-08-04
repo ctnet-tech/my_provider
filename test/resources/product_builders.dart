@@ -13,7 +13,7 @@ getProductBuidler(fetchState) {
     return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
   }
 
-  return Text(fetchState.response.name, textDirection: TextDirection.rtl);
+  return Text("NULL", textDirection: TextDirection.rtl);
 }
 
 deleteProducrtBuidler(fetchState) {
