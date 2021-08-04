@@ -125,21 +125,19 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
       }
     }
     if (!widget.lazy) {
-      if(widget.providerKey==null)
-        {
-          _request(null);
-        }
-     else if (Fetch.mapIsCaching[widget.providerKey!] == false ||
+      if (widget.providerKey == null) {
+        _request(null);
+      } else if (Fetch.mapIsCaching[widget.providerKey!] == false ||
           Fetch.mapFetch.keys
               .where((element) => element == widget.providerKey!)
               .isEmpty) {
         _request(null);
       }
     }
-    if(Fetch.mapFetch.keys
-        .where((element) => element == widget.providerKey!)
-        .isEmpty && widget.providerKey!=null)
-      Fetch.mapFetch[widget.providerKey!]=_fetchState;
+    if (widget.providerKey != null &&
+        Fetch.mapFetch.keys
+            .where((element) => element == widget.providerKey!)
+            .isEmpty) Fetch.mapFetch[widget.providerKey!] = _fetchState;
 
     super.initState();
   }
