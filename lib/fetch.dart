@@ -4,14 +4,12 @@ import 'provider.dart';
 
 class FetchException {
   FetchException({required this.exception, required this.message});
-
   final Exception exception;
   final String message;
 }
 
 class FetchError {
   FetchError({required this.httpStatus, required this.message});
-
   final int httpStatus;
   final String message;
 }
@@ -67,7 +65,6 @@ class Fetch<TResponse, TParams> extends StatefulWidget {
       callback.callbackFunc(fetchState, hasOnSuccess);
     }
   }
-
 
   Fetch({
     Key? key,
@@ -160,8 +157,6 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
     if (_timer != null) _timer!.cancel();
     super.dispose();
   }
-
-
 
   _onUpdateFetchStateCallback(FetchState fetchState, hasOnSuccess) {
     if (this._disposed) {

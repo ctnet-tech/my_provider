@@ -53,7 +53,6 @@ main() {
         await tester.pump(Duration(seconds: 1));
         expect(fetchState_1, isNot(null));
         expect(fetchState_2, isNot(null));
-
         expect(fetchState_1, fetchState_2);
       });
 
@@ -71,7 +70,6 @@ main() {
 
         dynamic fetchState_1;
         dynamic fetchState_2;
-
         var requestCount = 0;
         var successCount = 0;
 
@@ -117,6 +115,8 @@ main() {
                 textDirection: TextDirection.rtl,
               );
             });
+
+
         await tester.pumpWidget(fetch);
         await tester.pump(Duration(seconds: 2));
 
