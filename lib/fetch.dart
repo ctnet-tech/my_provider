@@ -144,6 +144,8 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
   @override
   void dispose() {
     this._disposed = true;
+    Fetch.initData.removeWhere((key, value) => key == _providerKey);
+    Fetch.expireCache.removeWhere((key, value) => key == _providerKey);
     super.dispose();
   }
 
@@ -188,22 +190,22 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
         return;
       }
 
+      this.setState(() => _fetchState = FetchState(
+            fetch: _request,
+            loading: false,
+            response: response,
+            error: null,
+          ));
+
       if (_providerKey == null) {
-        this.setState(() => _fetchState = FetchState(
-              fetch: _request,
-              loading: false,
-              response: response,
-              error: null,
-            ));
+        if (widget.onSuccess != null) {
+          widget.onSuccess!(response, _fetchState);
+        }
       } else {
         _fetchState = FetchState(
             fetch: _request, loading: false, response: response, error: null);
 
         Fetch.setFetchState(_providerKey!, _fetchState, hasOnSuccess: true);
-      }
-
-      if (_providerKey == null) if (widget.onSuccess != null) {
-        widget.onSuccess!(response, _fetchState);
       }
     } on FetchError catch (error) {
       if (this._disposed) {
