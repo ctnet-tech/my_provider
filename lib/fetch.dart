@@ -189,7 +189,7 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
       if (this._disposed) {
         return;
       }
-
+      
       this.setState(() => _fetchState = FetchState(
             fetch: _request,
             loading: false,
