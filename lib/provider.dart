@@ -45,6 +45,12 @@ class Provider<TValue> {
   }
 
   dispose() {
-    throw UnimplementedError();
+    var callbacks = Provider.callbacks
+        .where((element) => element.providerKey == this.providerKey);
+
+    for (var callback in callbacks) {
+      callback.callbackFunc(null);
+    }
+    Provider.providers.removeWhere((key, value) => key == providerKey);
   }
 }
