@@ -146,33 +146,32 @@ main() {
     var requestCount = 0;
     var successCount = 0;
 
-    var fetch = Column(
-      children: [
-        Fetch<Product?, ProductFetchParams>(
-          providerKey: "FETCH_PRODUCT",
-          cacheDuration: 10000,
-          onSuccess: (response, fetchState) {
-            successCount++;
-            fetchState_1 = fetchState;
-          },
-          params: params,
-          request: (params) async {
-            requestCount++;
-            return await getProduct(params);
-          },
-          builder: (fetchState) {
-            if (fetchState.loading == true) {
-              return Text(
-                loadingText,
-                textDirection: TextDirection.rtl,
-              );
-            }
+    var fetch = Fetch<Product?, ProductFetchParams>(
+        providerKey: "FETCH_PRODUCT",
+        cacheDuration: 10000,
+        onSuccess: (response, fetchState) {
+          successCount++;
+          fetchState_1 = fetchState;
+        },
+        params: params,
+        request: (params) async {
+          requestCount++;
+          return await getProduct(params);
+        },
+        builder: (fetchState) {
+          if (fetchState.loading == true) {
+            return Text(
+              loadingText,
+              textDirection: TextDirection.rtl,
+            );
+          }
 
+          if (fetchState.response != null)
             return Fetch<Product?, ProductFetchParams>(
                 providerKey: "FETCH_PRODUCT",
                 cacheFirst: true,
-                onInit: (fetchState) {
-                  fetchState_2 = fetchState;
+                onInit: (fetchStateInit) {
+                  fetchState_2 = fetchStateInit;
                 },
                 onSuccess: (response, fetchState) {
                   successCount++;
@@ -184,17 +183,34 @@ main() {
                   return await getProduct(params);
                 },
                 builder: getProductBuidler);
-          },
-        ),
-      ],
-    );
-
+          return Text(
+            "NULL",
+            textDirection: TextDirection.rtl,
+          );
+        });
     await tester.pumpWidget(fetch);
     await tester.pump(Duration(seconds: 2));
 
-    expect(requestCount, 1);
-    expect(successCount, 1);
+    await tester.pump(Duration(seconds: 12));
+    Fetch.expireCache["FETCH_PRODUCT"] = false;
+    var fetch2 = Fetch<Product?, ProductFetchParams>(
+        key: GlobalKey(),
+        providerKey: "FETCH_PRODUCT",
+        cacheFirst: true,
+        onInit: (fetchStateInit) {},
+        onSuccess: (response, fetchState) async {
+          successCount++;
+        },
+        params: params,
+        request: (params) async {
+          requestCount++;
+          return await getProduct(params);
+        },
+        builder: getProductBuidler);
 
-    expect(fetchState_1, fetchState_2);
+    await tester.pumpWidget(fetch2);
+    await tester.pump(Duration(seconds: 2));
+    expect(requestCount, 2);
+    expect(successCount, 2);
   });
 }

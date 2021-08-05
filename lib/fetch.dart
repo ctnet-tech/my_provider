@@ -108,6 +108,10 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
   bool get isProviderKeyEmpty =>
       Fetch.initData.keys.where((element) => element == _providerKey!).isEmpty;
 
+  bool get isExpireCache => Fetch.expireCache.keys
+      .where((element) => element == _providerKey!)
+      .isEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -132,7 +136,9 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
     }
 
     if (!widget.lazy) {
-      if (_providerKey == null || isProviderKeyEmpty) {
+      if (_providerKey == null ||
+          isProviderKeyEmpty ||
+          isExpireCache == false) {
         _request(null);
       }
     }
@@ -189,7 +195,7 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
       if (this._disposed) {
         return;
       }
-      
+
       this.setState(() => _fetchState = FetchState(
             fetch: _request,
             loading: false,
