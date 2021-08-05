@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 typedef ProviderCallbackFunc<TValue> = void Function(TValue value);
 
 class ProviderCallback<TValue> {
@@ -5,7 +7,6 @@ class ProviderCallback<TValue> {
 
   final String providerKey;
   final ProviderCallbackFunc<TValue> callbackFunc;
-
 }
 
 class Provider<TValue> {
@@ -46,6 +47,12 @@ class Provider<TValue> {
   }
 
   dispose() {
-    throw UnimplementedError();
+    var callbacks = Provider.callbacks
+        .where((element) => element.providerKey == this.providerKey);
+
+    for (var callback in callbacks) {
+      callback.callbackFunc(null);
+    }
+    Provider.providers.removeWhere((key, value) => key == providerKey);
   }
 }

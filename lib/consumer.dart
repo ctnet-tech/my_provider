@@ -26,8 +26,8 @@ class _ConsumerState<TValue> extends State<Consumer<TValue>> {
 
   @override
   void dispose() {
-    super.dispose();
     Provider.unregisterCallback(this._onUpdateCallback);
+    super.dispose();
   }
 
   void _onUpdateCallback(TValue nextValue) {

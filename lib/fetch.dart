@@ -144,6 +144,8 @@ class _FetchState<TResponse, TParams> extends State<Fetch<TResponse, TParams>> {
 
   @override
   void dispose() {
+    Fetch.mapFetch.removeWhere((key, value) => key == widget.providerKey);
+    Fetch.mapIsCaching.removeWhere((key, value) => key == widget.providerKey);
     this._disposed = true;
     if (_timer != null) _timer!.cancel();
     super.dispose();
