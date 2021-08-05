@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
@@ -53,6 +53,7 @@ main() {
         await tester.pump(Duration(seconds: 1));
         expect(fetchState_1, isNot(null));
         expect(fetchState_2, isNot(null));
+
         expect(fetchState_1, fetchState_2);
       });
 
@@ -70,6 +71,7 @@ main() {
 
         dynamic fetchState_1;
         dynamic fetchState_2;
+
         var requestCount = 0;
         var successCount = 0;
 
@@ -77,12 +79,12 @@ main() {
             providerKey: "FETCH_PRODUCT",
             cacheDuration: 10000,
             onSuccess: (response, fetchState) {
-              successCount++;
+              successCount+=1;
               fetchState_1 = fetchState;
             },
             params: params,
             request: (params) async {
-              requestCount++;
+              requestCount+=1;
               return await getProduct(params);
             },
             builder: (fetchState) {
@@ -101,12 +103,12 @@ main() {
                       fetchState_2 = fetchStateInit;
                     },
                     onSuccess: (response, fetchState) {
-                      successCount++;
+                      successCount +=1;
                       fetchState_2 = fetchState;
                     },
                     params: params,
                     request: (params) async {
-                      requestCount++;
+                      requestCount +=1;
                       return await getProduct(params);
                     },
                     builder: getProductBuidler);
@@ -115,8 +117,6 @@ main() {
                 textDirection: TextDirection.rtl,
               );
             });
-
-
         await tester.pumpWidget(fetch);
         await tester.pump(Duration(seconds: 2));
 
@@ -124,5 +124,6 @@ main() {
         expect(successCount, 1);
         expect(fetchState_1, fetchState_2);
       });
+
 
 }
