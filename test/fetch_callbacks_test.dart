@@ -18,7 +18,7 @@ main() {
     setClient(client);
 
     when(client.delete(
-            Uri.parse("https://domain.com/products/${params.body!.id}")))
+            Uri.parse("https://$domain$productsPath/${params.productId}")))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 200);
@@ -26,7 +26,7 @@ main() {
 
     var isSuccess = false;
 
-    var fetch = Fetch<Product?, ProductFetchParams>(
+    var fetch = Fetch<Product>(
         lazy: true,
         onSuccess: (response, _) {
           isSuccess = true;
@@ -48,7 +48,7 @@ main() {
     var client = MockClient();
     setClient(client);
 
-    when(client.post(Uri.parse("https://domain.com/products"), body: body))
+    when(client.post(Uri.parse("https://$domain$productsPath"), body: body))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 400);
@@ -56,7 +56,7 @@ main() {
 
     var isError = false;
 
-    var fetch = Fetch<Product?, ProductFetchParams>(
+    var fetch = Fetch<Product>(
         lazy: true,
         onError: (error) {
           isError = true;

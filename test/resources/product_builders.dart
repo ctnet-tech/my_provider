@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:my_provider/fetch.dart';
 
+import 'product.dart';
 import 'product_data.dart';
 
 const loadingText = 'LOADING';
+const deleteText = 'DELETE';
+const deletedText = 'DELETED';
 
-getProductBuidler(fetchState) {
+Widget getProductBuidler(FetchState<Product> fetchState) {
   if (fetchState.loading == true) {
     return Text(loadingText, textDirection: TextDirection.ltr);
   }
 
-  if (fetchState.response != null) {
-    return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
+  if (fetchState.response == null) {
+    return Text("NULL", textDirection: TextDirection.rtl);
   }
 
-  return Text(fetchState.response.name, textDirection: TextDirection.rtl);
+  return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
 }
 
-deleteProducrtBuidler(fetchState) {
+Widget deleteProducrtBuidler(FetchState<Product> fetchState) {
   if (fetchState.loading == true) {
     return Text(loadingText, textDirection: TextDirection.ltr);
   }
@@ -28,14 +32,14 @@ deleteProducrtBuidler(fetchState) {
   return MaterialApp(
     home: Scaffold(
       body: ElevatedButton(
-        child: Text("Delete", textDirection: TextDirection.ltr),
+        child: Text(deleteText, textDirection: TextDirection.ltr),
         onPressed: () => fetchState.fetch(null),
       ),
     ),
   );
 }
 
-createProductBuilder(fetchState) {
+Widget createProductBuilder(FetchState<Product> fetchState) {
   if (fetchState.loading == true) {
     return Text(loadingText, textDirection: TextDirection.ltr);
   }

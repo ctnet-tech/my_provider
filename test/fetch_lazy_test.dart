@@ -17,14 +17,13 @@ main() {
     var client = MockClient();
     setClient(client);
 
-    when(client.delete(
-            Uri.parse("https://domain.com/products/${params.body!.id}")))
+    when(client.delete(Uri.parse("https://$domain$productsPath/1")))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 200);
     });
 
-    var fetch = Fetch<Product?, ProductFetchParams>(
+    var fetch = Fetch<Product>(
         lazy: true,
         params: params,
         request: deleteProduct,
@@ -44,13 +43,13 @@ main() {
     var client = MockClient();
     setClient(client);
 
-    when(client.post(Uri.parse("https://domain.com/products"), body: body))
+    when(client.post(Uri.parse("https://$domain$productsPath"), body: body))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 200);
     });
 
-    var fetch = Fetch<Product?, ProductFetchParams>(
+    var fetch = Fetch<Product>(
         lazy: true, request: postProduct, builder: createProductBuilder);
 
     await tester.pumpWidget(fetch);

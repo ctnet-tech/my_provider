@@ -3,19 +3,20 @@ import 'package:flutter/material.dart';
 
 import 'package:my_provider/index.dart';
 
-const providerKey = 'SIMPLE_PROVIDER';
 const valueString = 'HELLO';
 const valueStringNext = 'GOOD BYE';
 const valueStringNULL = 'NULL';
 
 main() {
   testWidgets("Consumer: basic usage", (WidgetTester tester) async {
-    Provider<String?>(providerKey: providerKey, value: valueString);
+    const providerKey = 'SIMPLE_PROVIDER_1';
+
+    Provider<String?>(providerKey).setValue(valueString);
 
     var consumer = Consumer<String>(
         providerKey: providerKey,
         builder: (context, value) {
-          return Text(value, textDirection: TextDirection.ltr);
+          return Text(value!, textDirection: TextDirection.ltr);
         });
 
     // with initial value
@@ -25,13 +26,14 @@ main() {
   });
 
   testWidgets("Consumer: update provider's value", (WidgetTester tester) async {
-    var simpleProvider =
-        Provider<String?>(providerKey: providerKey, value: valueString);
+    const providerKey = 'SIMPLE_PROVIDER_2';
+
+    var simpleProvider = Provider<String?>(providerKey).setValue(valueString);
 
     var consumer = Consumer<String>(
         providerKey: providerKey,
         builder: (context, value) {
-          return Text(value, textDirection: TextDirection.ltr);
+          return Text(value!, textDirection: TextDirection.ltr);
         });
 
     // with initial value
@@ -41,31 +43,6 @@ main() {
     simpleProvider.setValue(valueStringNext);
     await tester.pump();
     var valueFinder = find.text(valueStringNext);
-    expect(valueFinder, findsOneWidget);
-  });
-
-  testWidgets("Provider: dispose", (WidgetTester tester) async {
-    var simpleProvider =
-        Provider<String?>(providerKey: providerKey, value: valueString);
-
-    var consumer = Consumer<String?>(
-        providerKey: providerKey,
-        builder: (context, value) {
-          if (value == null) {
-            return Text(valueStringNULL, textDirection: TextDirection.ltr);
-          }
-
-          return Text(value, textDirection: TextDirection.ltr);
-        });
-
-    // with initial value
-    await tester.pumpWidget(consumer);
-
-    // dispose provider's value
-    simpleProvider.dispose();
-
-    await tester.pump();
-    var valueFinder = find.text(valueStringNULL);
     expect(valueFinder, findsOneWidget);
   });
 }

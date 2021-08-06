@@ -1,50 +1,68 @@
-typedef ProviderCallbackFunc<TValue> = void Function(TValue value);
-
-class ProviderCallback<TValue> {
-  ProviderCallback(this.providerKey, this.callbackFunc);
-
-  final String providerKey;
-  final ProviderCallbackFunc<TValue> callbackFunc;
-}
+import 'package:my_provider/store.dart';
 
 class Provider<TValue> {
-  static Map<String, dynamic> providers = Map();
-  static List<ProviderCallback> callbacks = [];
+  Provider(this.key);
 
-  static registerCallback<TConsumerValue>(
-      ProviderCallback<TConsumerValue> providerCallback) {
-    Provider.callbacks.add(providerCallback);
+  final String key;
+
+  bool expired = false;
+  int? cacheDuration;
+
+  StoreCallbackFunc<TValue>? _onUpdating;
+  StoreCallbackFunc<TValue>? _onExpired;
+
+  void _instanceOnExpired<TValue>(value) {
+    expired = true;
   }
 
-  static unregisterCallback<TConsumerValue>(
-      ProviderCallbackFunc<TConsumerValue> callbackFunc) {
-    Provider.callbacks
-        .removeWhere((element) => element.callbackFunc == callbackFunc);
+  TValue? getValue<TValue>() {
+    return Store.getValue(key) as TValue?;
   }
 
-  Provider({required this.providerKey, this.value}) {
-    Provider.providers[providerKey] = value;
+  Provider setValue(TValue? nextValue) {
+    Store.setValue(key, nextValue);
+    return this;
   }
 
-  final String providerKey;
-  final TValue? value;
-
-  void _runCallbackBeforeUpdate(TValue nextValue) {
-    var callbacks = Provider.callbacks
-        .where((element) => element.providerKey == this.providerKey);
-
-    for (var callback in callbacks) {
-      callback.callbackFunc(nextValue);
+  Provider setCacheDuration(int msDuration) {
+    if (this.cacheDuration == null) {
+      Store.addListener(key, _instanceOnExpired, StoreEvent.expired);
     }
+
+    this.cacheDuration = msDuration;
+    Store.setCacheDuration<TValue>(key, msDuration);
+    return this;
   }
 
-  setValue(TValue nextValue) {
-    _runCallbackBeforeUpdate(nextValue);
+  void onUpdating(StoreCallbackFunc<TValue> callbackFunc) {
+    if (_onUpdating != null) {
+      Store.unregisterCallback(this._onUpdating!);
+    }
 
-    Provider.providers[providerKey] = nextValue;
+    _onUpdating = callbackFunc;
+    Store.addListener(key, _onUpdating!, StoreEvent.updating);
   }
 
-  dispose() {
-    throw UnimplementedError();
+  void onExpired(StoreCallbackFunc<TValue> callbackFunc) {
+    if (_onExpired != null) {
+      Store.unregisterCallback(this._onExpired!);
+    }
+
+    _onExpired = callbackFunc;
+    Store.addListener(key, _onExpired!, StoreEvent.expired);
+  }
+
+  void dispose() {
+    if (this.cacheDuration == null) {
+      Store.unregisterCallback(this._instanceOnExpired);
+    }
+
+    if (this._onUpdating != null) {
+      Store.unregisterCallback(this._onUpdating!);
+    }
+
+    if (this._onExpired != null) {
+      Store.unregisterCallback(this._onUpdating!);
+    }
   }
 }
