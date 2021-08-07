@@ -10,13 +10,14 @@ class FetchList<TValue> extends StatefulWidget {
       required this.listValue,
       required this.itemsPerPage,
       required this.itemsLoadFist,
-      required this.builderLoading});
+      required this.builderLoading, this.loadFull});
 
   final int itemsLoadFist;
   final ChildWidgetFetchBuilder<TValue> buildChild;
   final ChildWidgetFetchBuilder<String> builderLoading;
   final List<TValue> listValue;
   final int itemsPerPage;
+  final Function(dynamic)? loadFull;
 
   @override
   _FetchListState<TValue> createState() => _FetchListState<TValue>();
@@ -42,8 +43,16 @@ class _FetchListState<TValue> extends State<FetchList<TValue>> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _loadMore();
+         _loadMore();
+         if(this._listChild.length ==0){
+           widget.loadFull!(this);
+         }
       }
+    });
+  }
+  void addMoreData({required List<TValue> list}){
+    _listChild.addAll(list);
+    setState(() {
     });
   }
 
