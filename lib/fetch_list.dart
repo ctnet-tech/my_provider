@@ -10,7 +10,8 @@ class FetchList<TValue> extends StatefulWidget {
       required this.listValue,
       required this.itemsPerPage,
       required this.itemsLoadFist,
-      required this.builderLoading, this.loadFull});
+      required this.builderLoading,
+      this.loadFull});
 
   final int itemsLoadFist;
   final ChildWidgetFetchBuilder<TValue> buildChild;
@@ -26,9 +27,8 @@ class FetchList<TValue> extends StatefulWidget {
 class _FetchListState<TValue> extends State<FetchList<TValue>> {
   List<TValue> _pairList = [];
   List<TValue> _listChild = [];
-  ScrollController _scrollController = new ScrollController(
+  ScrollController _scrollController = new ScrollController();
 
-  );
   @override
   void dispose() {
     _scrollController.dispose();
@@ -39,21 +39,21 @@ class _FetchListState<TValue> extends State<FetchList<TValue>> {
   void initState() {
     super.initState();
     _listChild = widget.listValue;
-    _loadMore(fistItems: widget.itemsLoadFist,isReload: false);
+    _loadMore(fistItems: widget.itemsLoadFist, isReload: false);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-         _loadMore();
-         if(this._listChild.length ==0){
-           widget.loadFull!(this);
-         }
+        _loadMore();
+        if (this._listChild.length == 0) {
+          widget.loadFull!(this);
+        }
       }
     });
   }
-  void addMoreData({required List<TValue> list}){
+
+  void addMoreData({required List<TValue> list}) {
     _listChild.addAll(list);
-    setState(() {
-    });
+    setState(() {});
   }
 
   void _loadMore({isReload = true, fistItems}) {
@@ -62,12 +62,8 @@ class _FetchListState<TValue> extends State<FetchList<TValue>> {
       var getList = _listChild.take(fistItems ?? widget.itemsPerPage);
       _pairList.addAll(getList);
       _listChild.removeRange(0, fistItems ?? widget.itemsPerPage);
-
     }
-    setState(() {
-
-    });
-
+    setState(() {});
   }
 
   @override

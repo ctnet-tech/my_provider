@@ -60,7 +60,7 @@ main() {
     // moi man hinh test offset  500>=size>450
     // ban dau
     var fetchList = 'Test_PRODUCT_9';
-    var textNotHas ='Test_PRODUCT_15';
+    var textNotHas = 'Test_PRODUCT_15';
     await tester.pumpWidget(fetch);
     await tester.pump(Duration(seconds: 1));
     var listText = find.text(fetchList);
@@ -69,12 +69,13 @@ main() {
     expect(testNotHasText, findsNothing);
 
     // load lan 1
-    final listView = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    final listView = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView));
     final ctrl = listView.controller;
     ctrl!.jumpTo(ctrl.offset + 500);
     await tester.pumpAndSettle(Duration(seconds: 1));
     fetchList = 'Test_PRODUCT_19';
-    textNotHas ='Test_PRODUCT_20';
+    textNotHas = 'Test_PRODUCT_20';
     listText = find.text(fetchList);
     expect(listText, findsOneWidget);
     testNotHasText = find.text(textNotHas);
@@ -85,7 +86,7 @@ main() {
     ctrl.jumpTo(ctrl.offset + 1000);
     await tester.pumpAndSettle(Duration(seconds: 1));
     fetchList = 'Test_PRODUCT_29';
-    textNotHas ='Test_PRODUCT_30';
+    textNotHas = 'Test_PRODUCT_30';
     listText = find.text(fetchList);
     expect(listText, findsOneWidget);
     testNotHasText = find.text(textNotHas);
@@ -96,16 +97,16 @@ main() {
     ctrl.jumpTo(ctrl.offset + 1500);
     await tester.pumpAndSettle(Duration(seconds: 1));
     fetchList = 'Test_PRODUCT_39';
-    textNotHas ='Test_PRODUCT_40';
+    textNotHas = 'Test_PRODUCT_40';
     listText = find.text(fetchList);
     expect(listText, findsOneWidget);
     testNotHasText = find.text(textNotHas);
     expect(testNotHasText, findsNothing);
-
   });
 
 
-  testWidgets("Fetch caching: list fetch load more", (WidgetTester tester) async {
+  testWidgets(
+      "Fetch caching: list fetch load more", (WidgetTester tester) async {
     var client = MockClient();
     setClient(client);
 
@@ -140,8 +141,8 @@ main() {
                     return ListTile(
                         title: Text(txt, textDirection: TextDirection.ltr));
                   },
-                  loadFull: (fetchList){
-                    fetchList.addMoreData(list:listProductAddMore);
+                  loadFull: (fetchList) {
+                    fetchList.addMoreData(list: listProductAddMore);
                   },
                 );
               }
@@ -154,7 +155,7 @@ main() {
     // moi man hinh test offset  500>=size>450
     // ban dau
     var fetchList = 'Test_PRODUCT_9';
-    var textNotHas ='Test_PRODUCT_15';
+    var textNotHas = 'Test_PRODUCT_15';
     await tester.pumpWidget(fetch);
     await tester.pump(Duration(seconds: 1));
     var listText = find.text(fetchList);
@@ -163,12 +164,13 @@ main() {
     expect(testNotHasText, findsNothing);
 
 
-    int lastScroll = 0 ;
-    final listView = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    int lastScroll = 0;
+    final listView = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView));
     final ctrl = listView.controller;
 
-    for(int i=500;i <= 4500;i+=500){
-      lastScroll = i ;
+    for (int i = 500; i <= 4500; i += 500) {
+      lastScroll = i;
       ctrl!.jumpTo(ctrl.offset + i);
       await tester.pumpAndSettle(Duration(seconds: 1));
     }
@@ -184,8 +186,5 @@ main() {
     textLast = 'Test_PRODUCT_109';
     findText = find.text(textLast);
     expect(findText, findsOneWidget);
-
-
-
   });
 }
