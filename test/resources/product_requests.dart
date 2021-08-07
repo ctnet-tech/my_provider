@@ -20,6 +20,15 @@ Future<Product> getProduct(ProductFetchParams? params) async {
   var product = ProductFactory.create(response.body);
   return product;
 }
+Future<List<Product>> getListProduct(int? page) async {
+  final response = await _client!
+      .get(Uri.parse("https://domain.com/products/$page"));
+  if (response.statusCode != 200) {
+    throw FetchError(httpStatus: response.statusCode, message: response.body);
+  }
+  var products = ProductFactory.createList(response.body);
+  return products;
+}
 
 Future<Product> postProduct(ProductFetchParams? params) async {
   final response = await _client!
