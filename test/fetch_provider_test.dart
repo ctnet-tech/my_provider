@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -24,7 +25,7 @@ main() {
     });
 
     when(client.delete(
-            Uri.parse("https://domain.com/products/${params.body!.id}")))
+        Uri.parse("https://domain.com/products/${params.body!.id}")))
         .thenAnswer((_) async {
       await Future.delayed(Duration(seconds: 1));
       return http.Response(productJsonString, 200);
