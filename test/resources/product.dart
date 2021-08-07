@@ -6,6 +6,13 @@ class ProductFactory {
     var product = ProductFactory._fromJson(json);
     return product;
   }
+  static List<Product> createList(String jsonString){
+    List<Product> users = (json.decode(jsonString) as List)
+        .map((json) => ProductFactory._fromJson(json))
+        .toList();
+
+    return users;
+  }
 
   static Product _fromJson(Map<String, dynamic> json) {
     var product = Product();
@@ -31,7 +38,7 @@ class ProductFactory {
 }
 
 class Product {
-  Product({this.name, this.type});
+  Product({this.name, this.type,this.id,this.isDeleted});
 
   int? id;
   String? name;
