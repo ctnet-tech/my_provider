@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_provider/fetch.dart';
+import 'package:my_dispatcher/index.dart';
 
 import 'product.dart';
 import 'product_data.dart';
@@ -20,13 +20,13 @@ Widget getProductBuidler(FetchState<Product> fetchState) {
   return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
 }
 
-Widget deleteProducrtBuidler(FetchState<Product> fetchState) {
+Widget deleteProductBuidler(FetchState<Product> fetchState) {
   if (fetchState.loading == true) {
     return Text(loadingText, textDirection: TextDirection.ltr);
   }
 
-  if (fetchState.response != null) {
-    return Text(fetchState.response!.name!, textDirection: TextDirection.ltr);
+  if (fetchState.response?.isDeleted == true) {
+    return Text(deletedText, textDirection: TextDirection.ltr);
   }
 
   return MaterialApp(

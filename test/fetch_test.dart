@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 import 'package:http/http.dart' as http;
 
 import 'fetch_test.mocks.dart';
@@ -15,7 +15,7 @@ const fetchExceptionMessage = 'UNKNOW_EXCEPTION';
 const fetchErrorMessage = 'PRODUCT_NOT_EXIST';
 const fetchResponseText = 'RESPONSE';
 const nullText = 'NULL';
-const loadingText = 'NULL';
+const loadingText = 'LOADING';
 
 MockClient? client;
 

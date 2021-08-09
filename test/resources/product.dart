@@ -1,6 +1,14 @@
 import 'dart:convert';
 
-class ProductFactory {
+abstract class ProductFactory {
+  static List<Product> createList(String jsonString) {
+    var rawModels = jsonDecode(jsonString) as List;
+    var products = rawModels
+        .map((rawModel) => ProductFactory._fromJson(rawModel))
+        .toList();
+    return products;
+  }
+
   static Product create(String jsonString) {
     var json = jsonDecode(jsonString);
     var product = ProductFactory._fromJson(json);
@@ -19,7 +27,7 @@ class ProductFactory {
     return product;
   }
 
-  Map<String, dynamic> toJson(Product product) {
+  static Map<String, dynamic> _productToMap(Product product) {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["id"] = product.id;
     data["name"] = product.name;
@@ -27,6 +35,16 @@ class ProductFactory {
     data["isDeleted"] = product.isDeleted;
 
     return data;
+  }
+
+  static String toJson(Product product) {
+    final Map<String, dynamic> data = _productToMap(product);
+    return json.encode(data);
+  }
+
+  static String listToJson(List<Product> products) {
+    var maps = products.map((product) => _productToMap(product)).toList();
+    return json.encode(maps);
   }
 }
 

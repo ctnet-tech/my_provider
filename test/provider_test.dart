@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 
 const valueString = 'HELLO';
 
 main() {
-  testWidgets("Provider: basic usage", (WidgetTester tester) async {
-    Provider("SIMPLE_PROVIDER");
+  testWidgets("Dispatcher: basic usage", (WidgetTester tester) async {
+    Dispatcher("SIMPLE_DISPATCHER");
   });
 }

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 
 import 'fetch_lazy_test.mocks.dart';
 import 'resources/product.dart';
@@ -24,27 +24,33 @@ main() {
       return http.Response(productJsonString, 200);
     });
 
-    var isSuccess = false;
+    var onSuccessCallback = 0;
 
     var fetch = Fetch<Product>(
         lazy: true,
         onSuccess: (response, _) {
-          isSuccess = true;
+          onSuccessCallback++;
         },
         params: params,
         request: deleteProduct,
-        builder: deleteProducrtBuidler);
+        builder: deleteProductBuidler);
 
     await tester.pumpWidget(fetch);
 
-    var textButton = find.byType(ElevatedButton);
-    await tester.tap(textButton);
-    await tester.pump(Duration(seconds: 1));
+    var deleteButton = find.byType(ElevatedButton);
+    await tester.tap(deleteButton);
 
-    expect(isSuccess, true);
+    // Waiting for delete
+    await tester.pump(Duration(seconds: 1));
+    expect(onSuccessCallback, 0);
+
+    // Delete successfully.
+    await tester.pump(Duration(seconds: 1));
+    expect(onSuccessCallback, 1);
   });
 
-  testWidgets("Fetch callback: error", (WidgetTester tester) async {
+  testWidgets("Fetch callback: onError should working correctly",
+      (WidgetTester tester) async {
     var client = MockClient();
     setClient(client);
 
@@ -54,22 +60,27 @@ main() {
       return http.Response(productJsonString, 400);
     });
 
-    var isError = false;
+    var onErrorCount = 0;
 
     var fetch = Fetch<Product>(
         lazy: true,
         onError: (error) {
-          isError = true;
+          onErrorCount++;
         },
         request: postProduct,
         builder: createProductBuilder);
 
     await tester.pumpWidget(fetch);
 
-    var textButton = find.byType(ElevatedButton);
-    await tester.tap(textButton);
-    await tester.pump(Duration(seconds: 1));
+    var deleteButton = find.byType(ElevatedButton);
+    await tester.tap(deleteButton);
 
-    expect(isError, true);
+    // Waiting for delete
+    await tester.pump(Duration(seconds: 1));
+    expect(onErrorCount, 0);
+
+    // Delete failured
+    await tester.pump(Duration(seconds: 1));
+    expect(onErrorCount, 1);
   });
 }

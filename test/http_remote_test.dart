@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 import 'package:http/http.dart' as http;
 
 import 'http_remote_test.mocks.dart';
@@ -13,8 +13,8 @@ Uri getUri(String path, dynamic params) {
   var queryParameters = Map<String, dynamic>();
 
   if (params != null) {
-    if (params.pagination is Pagination) {
-      var pagination = params.pagination as Pagination;
+    if (params.pagi is Pagination) {
+      var pagination = params.pagi as Pagination;
 
       queryParameters['page'] = pagination.page?.toString();
       queryParameters['itemPerPage'] = pagination.itemPerPage?.toString();
@@ -35,7 +35,7 @@ main() {
   final headers = Map<String, String>();
   headers["Authorization"] = "Bearer some_jwt_token";
 
-  final fetchParams = ProductFetchParams(pagination: Pagination(page: 2));
+  final fetchParams = ProductFetchParams(pagi: Pagination(2));
   final uri = getUri(productsPath, fetchParams);
 
   test("Remote: createRequest should working correctly", () async {

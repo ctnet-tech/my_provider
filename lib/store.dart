@@ -1,86 +1,93 @@
 import 'dart:async';
 
-import 'package:my_provider/event_emitter.dart';
+import 'helpers/index.dart';
 
-enum StoreEvent { updating, updated, expired }
-
-typedef StoreCallbackFunc<TValue> = void Function(
-    StoreCallbackParam<TValue> value);
-
-class StoreSubscriber<TValue> {
-  StoreSubscriber(this.key, this.eventListener, this.storeEvent);
-
-  final String key;
-  final StoreEvent storeEvent;
-  final EventListener<StoreCallbackParam<TValue>> eventListener;
-}
-
-class StoreCallbackParam<TValue> {
-  StoreCallbackParam(this.key,
-      {this.currentValue, this.newValue, this.oldValue});
-
-  final String key;
-
-  final TValue? currentValue;
-  final TValue? newValue;
-  final TValue? oldValue;
-}
-
-class Store {
-  static Map<String, dynamic> _providers = Map();
+abstract class Store {
+  static Map<String, dynamic> _cacheValues = Map();
   static List<StoreSubscriber> _subscribers = [];
 
-  static addListener<TConsumerValue>(String key,
-      StoreCallbackFunc<TConsumerValue> callback, StoreEvent storeEvent) {
-    var eventKey = getEventKey(key, storeEvent);
-    var eventEmitter =
-        EventEmitter.addListener<StoreCallbackParam<TConsumerValue?>>(
+  static registerEvent<TPresenterValue>(dynamic rawKey,
+      StoreCallbackFunc<TPresenterValue> callback, StoreEvent storeEvent) {
+    final key = StoreKeys.fromRaw(rawKey);
+    final eventKey = StoreKeys.getEventKey(key, storeEvent);
+    final eventEmitter =
+        EventEmitter.addListener<StoreCallbackParam<TPresenterValue?>>(
             eventKey, callback);
 
     _subscribers.add(StoreSubscriber(key, eventEmitter, StoreEvent.updated));
   }
 
-  static unregisterCallback<TConsumerValue>(
-      StoreCallbackFunc<TConsumerValue> storeCallback) {
-    var removingSubscribers = Store._subscribers
-        .where((e) => e.eventListener.listener == storeCallback);
+  static unregisterEvent<TPresenterValue>(
+      StoreCallbackFunc<TPresenterValue> storeCallback) {
+    final removingSubscribers = Store._subscribers
+        .where((e) => e.eventListener.listener == storeCallback)
+        .toList();
 
-    for (var removingSubscriber in removingSubscribers) {
+    for (final removingSubscriber in removingSubscribers) {
       EventEmitter.removeListener(removingSubscriber.key, removingSubscriber);
       Store._subscribers.remove(removingSubscriber);
     }
   }
 
-  static setCacheDuration<TValue>(String key, int msDuration) {
+  static setCacheDuration<TValue>(dynamic rawKey, int msDuration) {
+    final key = StoreKeys.fromRaw(rawKey);
+
     Timer(Duration(milliseconds: msDuration), () {
       Store._onCacheExpired<TValue>(key);
     });
   }
 
-  static setValue<TValue>(String key, TValue value) {
-    _dispathUpdating<TValue>(key, value);
-    Store._providers[key] = value;
+  static setInitialValue<TValue>(dynamic rawKey, TValue value) {
+    final key = StoreKeys.fromRaw(rawKey);
+
+    if (_cacheValues.containsKey(key)) {
+      return;
+    }
+
+    Store._cacheValues[key] = value;
   }
 
-  static getValue(String key) {
-    return Store._providers[key];
+  static setValue<TValue>(dynamic rawKey, TValue value) {
+    final key = StoreKeys.fromRaw(rawKey);
+
+    _emitUpdatings<TValue>(key, value);
+    Store._cacheValues[key] = value;
   }
 
-  static getEventKey(String key, StoreEvent storeEvent) {
-    var storeEventName = storeEvent.toString();
+  static getValue(dynamic rawKey) {
+    final key = StoreKeys.fromRaw(rawKey);
 
-    return "${key}_$storeEventName".toUpperCase();
+    return Store._cacheValues[key];
+  }
+
+  static isExisting(dynamic rawKey) {
+    final key = StoreKeys.fromRaw(rawKey);
+    return _cacheValues.containsKey(key);
+  }
+
+  static remove<TValue>(dynamic rawKey) {
+    final key = StoreKeys.fromRaw(rawKey);
+    _removeSubscribers(key);
+    Store._cacheValues.remove(key);
+  }
+
+  static _removeSubscribers(String key) {
+    _subscribers.where((e) => e.key == key).forEach((e) {
+      EventEmitter.removeListener(
+          e.eventListener.eventKey, e.eventListener.listener);
+    });
+    _subscribers.removeWhere((e) => e.key == key);
   }
 
   static _onCacheExpired<TValue>(String key) {
-    var oldValue = getValue(key) as TValue;
+    final oldValue = getValue(key) as TValue?;
 
-    Store._providers.remove(key);
-    Store._dispathExpired<TValue>(key, oldValue);
+    Store._cacheValues.remove(key);
+    Store._emitExpireds<TValue>(key, oldValue);
   }
 
-  static _dispathUpdating<TValue>(String key, dynamic newValue) {
-    var eventKey = getEventKey(key, StoreEvent.updating);
+  static _emitUpdatings<TValue>(String key, dynamic newValue) {
+    final eventKey = StoreKeys.getEventKey(key, StoreEvent.updating);
 
     EventEmitter.emit(
         eventKey,
@@ -88,9 +95,9 @@ class Store {
             currentValue: getValue(key), newValue: newValue));
   }
 
-  static _dispathExpired<TValue>(String key, dynamic oldValue) {
-    var eventKey = getEventKey(key, StoreEvent.expired);
-    var eventParams =
+  static _emitExpireds<TValue>(String key, dynamic oldValue) {
+    final eventKey = StoreKeys.getEventKey(key, StoreEvent.expired);
+    final eventParams =
         StoreCallbackParam<TValue>(key, oldValue: oldValue, newValue: null);
     EventEmitter.emit(eventKey, eventParams);
   }

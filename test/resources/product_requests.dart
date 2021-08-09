@@ -1,5 +1,5 @@
 import 'package:http/src/client.dart' as _i4;
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 
 import 'product.dart';
 import 'product_data.dart';
@@ -12,6 +12,17 @@ setClient(dynamic client) {
 
 const domain = "domain.com";
 const productsPath = "/products";
+
+Future<List<Product>> getProducts(dynamic params) async {
+  final response = await _client!
+      .get(Uri.parse("https://$domain$productsPath?page=${params.pagi.page}"));
+
+  if (response.statusCode != 200) {
+    throw FetchError(httpStatus: response.statusCode, message: response.body);
+  }
+
+  return ProductFactory.createList(response.body);
+}
 
 Future<Product> getProduct(dynamic params) async {
   final response = await _client!
@@ -41,5 +52,6 @@ Future<Product> deleteProduct(dynamic params) async {
   final response = await _client!
       .delete(Uri.parse("https://$domain$productsPath/${params!.productId}"));
   var product = ProductFactory.create(response.body);
+  product.isDeleted = true;
   return product;
 }

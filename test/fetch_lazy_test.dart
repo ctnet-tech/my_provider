@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 
 import 'fetch_lazy_test.mocks.dart';
 import 'resources/product.dart';
@@ -27,16 +27,23 @@ main() {
         lazy: true,
         params: params,
         request: deleteProduct,
-        builder: deleteProducrtBuidler);
+        builder: deleteProductBuidler);
 
     await tester.pumpWidget(fetch);
 
-    var textButton = find.byType(ElevatedButton);
-    await tester.tap(textButton);
-    await tester.pump(Duration(seconds: 1));
+    // Find and trigger create product request with lazy params
+    var deleteButton = find.byType(ElevatedButton);
+    await tester.tap(deleteButton);
 
-    var valueFinder = find.text(productData.name!);
-    expect(valueFinder, findsOneWidget);
+    // Waiting for delete
+    await tester.pump(Duration(seconds: 1));
+    var loadingFinder = find.text(loadingText);
+    expect(loadingFinder, findsOneWidget);
+
+    // Delete successfully
+    await tester.pump(Duration(seconds: 1));
+    var deletedFinder = find.text(deletedText);
+    expect(deletedFinder, findsOneWidget);
   });
 
   testWidgets("Lazy Fetch: with lazy params", (WidgetTester tester) async {
@@ -54,10 +61,17 @@ main() {
 
     await tester.pumpWidget(fetch);
 
+    // Find and trigger create product request with lazy params
     var textButton = find.byType(ElevatedButton);
     await tester.tap(textButton);
-    await tester.pump(Duration(seconds: 1));
 
+    // Waiting whole request
+    await tester.pump(Duration(seconds: 1));
+    var loadingFinder = find.text(loadingText);
+    expect(loadingFinder, findsOneWidget);
+
+    // Request successfully
+    await tester.pump(Duration(seconds: 1));
     var valueFinder = find.text(productData.name!);
     expect(valueFinder, findsOneWidget);
   });

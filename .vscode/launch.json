@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "my_provider",
+            "name": "my_dispatcher",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "my_provider (profile mode)",
+            "name": "my_dispatcher (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"

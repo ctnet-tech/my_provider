@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
-import 'package:my_provider/index.dart';
+import 'package:my_dispatcher/index.dart';
 
 import 'resources/product.dart';
 import 'resources/product_builders.dart';
@@ -36,17 +36,20 @@ main() {
     var requestCount = 0;
     var successCount = 0;
     var onResponseCount = 0;
+    var builderCount = 0;
 
-    final providerKey = "FETCH_PRODUCT_2";
+    final cacheKey = "FETCH_PRODUCT_2";
 
     var fetch = Column(
       children: [
         Fetch<Product>(
-            providerKey: providerKey,
             params: params,
             request: (params) async {
               requestCount++;
               return await getProduct(params);
+            },
+            createCache: (response, fetchState) {
+              return FetchCache(key: cacheKey);
             },
             onSuccess: (response, fetchState) {
               successCount++;
@@ -57,6 +60,8 @@ main() {
               responseFetch1 = response;
             },
             builder: (fetchState) {
+              builderCount++;
+
               if (fetchState.loading == true) {
                 return Text(
                   loadingText,
@@ -67,12 +72,14 @@ main() {
               return Column(
                 children: [
                   Fetch<Product>(
-                      providerKey: providerKey,
                       cacheFirst: true,
                       params: params,
                       request: (params) async {
                         requestCount++;
                         return await getProduct(params);
+                      },
+                      createCache: (response, fetchState) {
+                        return FetchCache(key: cacheKey);
                       },
                       onInit: (fetchState) {
                         responseFetch2 = fetchState.response;
@@ -85,10 +92,15 @@ main() {
                         onResponseCount++;
                         responseFetch2 = response;
                       },
-                      builder: getProductBuidler),
+                      builder: (fetchState) {
+                        builderCount++;
+                        return getProductBuidler(fetchState);
+                      }),
                   Fetch<Product>(
-                      providerKey: providerKey,
                       cacheFirst: false,
+                      createCache: (response, fetchState) {
+                        return FetchCache(key: cacheKey);
+                      },
                       onInit: (fetchState) {
                         onInitCountFetch3++;
                         initResponseFetch3 = fetchState.response;
@@ -105,7 +117,10 @@ main() {
                         requestCount++;
                         return await getProduct(params);
                       },
-                      builder: getProductBuidler)
+                      builder: (fetchState) {
+                        builderCount++;
+                        return getProductBuidler(fetchState);
+                      }),
                 ],
               );
             })
@@ -115,6 +130,7 @@ main() {
     await tester.pumpWidget(fetch);
     var loadingWidgets = find.text(loadingText);
     expect(loadingWidgets, findsNWidgets(1));
+    expect(builderCount, 1);
 
     await tester.pump(Duration(seconds: 1));
     // Fetch_2 reuse Fetch_1 response;
@@ -122,7 +138,8 @@ main() {
     expect(productNamesWidgets, findsNWidgets(1));
     expect(requestCount, 2);
     expect(successCount, 1);
-    expect(onResponseCount, 1);
+    expect(onResponseCount, 2);
+    expect(builderCount, 4);
 
     expect(responseFetch1, responseFetch2);
     expect(responseFetch1, isNot(responseFetch3));
@@ -135,7 +152,8 @@ main() {
     await tester.pump(Duration(seconds: 1));
     expect(requestCount, 2);
     expect(successCount, 2);
-    expect(onResponseCount, 4);
+    expect(onResponseCount, 5);
+    expect(builderCount, 7);
 
     expect(responseFetch1, responseFetch2);
     expect(responseFetch1, responseFetch3);
@@ -162,17 +180,18 @@ main() {
     var onResponseChangeCount = 0;
     var builderCount = 0;
 
-    final providerKey = "FETCH_PRODUCT_3";
+    final cacheKey = "FETCH_PRODUCT_3";
 
     var fetch = Column(
       children: [
         Fetch<Product>(
-            providerKey: providerKey,
             params: params,
-            cacheDuration: 1000,
             request: (params) async {
               requestCount++;
               return await getProduct(params);
+            },
+            createCache: (response, fetchState) {
+              return FetchCache(key: cacheKey, duration: 1000);
             },
             onSuccess: (response, fetchState) {
               successCount++;
@@ -180,7 +199,7 @@ main() {
             onResponseChange: (response, old) {
               onResponseChangeCount++;
             },
-            onResponseExpired: (fetchState) {
+            onCacheExpired: (cache, fetchState) {
               onResponseExpiredCount++;
             },
             builder: (fetchState) {
@@ -191,10 +210,11 @@ main() {
     );
 
     await tester.pumpWidget(fetch);
-    var loadingWidgets = find.text(loadingText);
-    expect(loadingWidgets, findsNWidgets(1));
+    var loadingFinder = find.text(loadingText);
+    expect(loadingFinder, findsNWidgets(1));
 
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(Duration(seconds: 1));
+    await tester.pump(Duration(seconds: 1));
 
     expect(requestCount, 1);
     expect(successCount, 1);

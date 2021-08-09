@@ -1,6 +1,7 @@
-export 'consumer.dart';
-export 'provider.dart';
+export 'presenter.dart';
+export 'dispatcher.dart';
 export 'fetch.dart';
 export 'http_remote.dart';
 export 'store.dart';
-export 'event_emitter.dart';
+
+export 'helpers/index.dart';
