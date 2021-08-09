@@ -6,7 +6,12 @@ class ProductFactory {
     var product = ProductFactory._fromJson(json);
     return product;
   }
-
+  static List<Product> createList(String jsonString) {
+    var jsonMap = jsonDecode(jsonString);
+    var products = jsonMap.cast<Map<String, dynamic>>().map<Product>((json) => ProductFactory._fromJson(json))
+        .toList();
+    return products;
+  }
   static Product _fromJson(Map<String, dynamic> json) {
     var product = Product();
 

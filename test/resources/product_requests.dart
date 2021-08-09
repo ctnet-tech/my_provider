@@ -40,3 +40,15 @@ Future<Product> deleteProduct(ProductFetchParams? params) async {
   var product = ProductFactory.create(response.body);
   return product;
 }
+
+Future<List<Product>> getProducts(ProductFetchParams? params) async {
+  final response = await _client!
+      .get(Uri.parse("https://domain.com/products"));
+
+  if (response.statusCode != 200) {
+    throw FetchError(httpStatus: response.statusCode, message: response.body);
+  }
+
+  var products = ProductFactory.createList(response.body);
+  return products;
+}
